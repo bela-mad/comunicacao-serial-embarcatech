@@ -33,15 +33,19 @@ project(serial-embarcatech C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+file(GLOB LIBSOURCES "inc/*.c")
+
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(serial-embarcatech serial-embarcatech.c )
+add_executable(serial-embarcatech serial-embarcatech.c ${LIBSOURCES} )
 
 pico_set_program_name(serial-embarcatech "serial-embarcatech")
 pico_set_program_version(serial-embarcatech "0.1")
 
+pico_generate_pio_header(serial-embarcatech ${CMAKE_CURRENT_LIST_DIR}/inc/ws2818b.pio)
+
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(serial-embarcatech 1)
+pico_enable_stdio_uart(serial-embarcatech 0)
 pico_enable_stdio_usb(serial-embarcatech 1)
 
 # Add the standard library to the build
@@ -55,7 +59,8 @@ target_include_directories(serial-embarcatech PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(serial-embarcatech 
-        
+        hardware_i2c
+        hardware_pio
         )
 
 pico_add_extra_outputs(serial-embarcatech)
