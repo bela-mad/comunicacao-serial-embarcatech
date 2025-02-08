@@ -24,12 +24,12 @@
 
 <h3> Estruturação dos Arquivos </h3>
 
-<p align="justify"> &emsp;&emsp;&emsp;&emsp; O projeto é composto pelos arquivos comuns a um projeto Pico W, além de uma pasta chamada 'inc', que possui 5 arquivos na extensão .c, que são: animation.c (que organiza as funções relacionadas à animação), button.c (que organiza as funções relacionadas aos botões), led-rgb.c (que organiza as funções relacionadas ao LED RGB), matriz_led.c (que organiza as funções relacionadas à matriz de LEDs) e sdd1306.c (que organiza as funções relacionadas ao display), 6 arquivos na extensão .h, que são: animaton.h, button.h, font.h, led-rgb.h, matriz_led.h e ssd1306.h (em que ambos possuem as importações e o cabeçalho das funções) e um arquivo ws2818b.pio, e os arquivos serial-embarcatech.c (que gerencia todo o projeto) e READ.ME (descrição do projeto).
+<p align="justify"> &emsp;&emsp;&emsp;&emsp; O projeto é composto pelos arquivos comuns a um projeto Pico W, além de uma pasta chamada 'inc', que possui 5 arquivos na extensão .c, que são: animation.c (que organiza as funções relacionadas à animação), button.c (que organiza as funções relacionadas aos botões), led_rgb.c (que organiza as funções relacionadas ao LED RGB), matriz_led.c (que organiza as funções relacionadas à matriz de LEDs) e sdd1306.c (que organiza as funções relacionadas ao display), 6 arquivos na extensão .h, que são: animaton.h, button.h, font.h, led_rgb.h, matriz_led.h e ssd1306.h (em que ambos possuem as importações e o cabeçalho das funções) e um arquivo ws2818b.pio, e os arquivos serial-embarcatech.c (que gerencia todo o projeto) e READ.ME (descrição do projeto).
 
 <h3></h3>
 <h2 align="center"> Vídeo :video_camera: </h2>
 <p align="justify"> &emsp;&emsp;&emsp;&emsp; Aqui está o link para o vídeo com uma prática de simulação associada a esta tarefa: </p>
-<p align="center">  </p>
+<p align="center"> https://youtube.com/shorts/eecuZJhzQQk?feature=share </p>
 
 <h2></h2>
 <h2 align="center"> Como utilizar :computer_mouse: </h2>
