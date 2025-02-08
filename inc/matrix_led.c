@@ -10,7 +10,7 @@ uint sm;
 uint matrix_init(uint pin_out) {
 
   bool ok;
-  ok = set_sys_clock_khz(133000, false);  // Configura o clock para 133 MHz
+  ok = set_sys_clock_khz(133000, false);  // configura o clock para 133 MHz
   stdio_init_all();
 
   printf("Iniciando a transmissão PIO\n");
@@ -42,7 +42,7 @@ int matrix_get_index(int aux) {
   }
 }
 
-// Função que desenha (acende os LEDs) o padrão passado pela matriz de animação na matriz de LED
+// Função que desenha o padrão passado pela matriz de animação na matriz de LED
 void matrix_draw_number(const uint32_t matriz[10][25], uint8_t numero) {
   for (uint8_t aux = 0; aux < NUM_PIXELS; aux++) {
     uint8_t led = matrix_get_index(aux);

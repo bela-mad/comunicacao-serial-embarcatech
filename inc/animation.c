@@ -1,6 +1,6 @@
 #include "animation.h"
 
-// Matriz de animação dos números
+// Matriz de animação dos números com intensidade de luz reduzida
 const uint32_t numeros_low[10][25] = {
 {
 0x00000000, 0x3160300, 0x3160300, 0x3160300, 0x00000000, 
