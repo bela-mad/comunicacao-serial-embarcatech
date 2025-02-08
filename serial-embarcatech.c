@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "inc/ssd1306.h"
-#include "inc/font.h"
+#include "../inc/animation.h"
 #include "inc/button.h"
+#include "inc/font.h"
 #include "inc/led_rgb.h"
 #include "inc/matrix_led.h"
+#include "inc/ssd1306.h"
 #define I2C_PORT i2c1
 #define I2C_SDA 14
 #define I2C_SCL 15
@@ -13,12 +14,13 @@
 
 void gpio_irq_handler(uint gpio, uint32_t events);
 
-uint32_t last_time_a = 0;
-uint32_t last_time_b = 0;
+uint8_t num = 0;
+absolute_time_t debounce;
+uint32_t last_time = 0;
 ssd1306_t ssd;
-bool cor = true;
 
-int main() {
+int main()
+{
 
   stdio_init_all();
 
@@ -49,90 +51,83 @@ int main() {
   ssd1306_fill(&ssd, false);
   ssd1306_send_data(&ssd);
 
-  while (true) {
-    // cor = !cor;
-    // // Atualiza o conteúdo do display com animações
-    // ssd1306_fill(&ssd, !cor); // Limpa o display
+  debounce = delayed_by_ms(get_absolute_time(), 200);
 
-    // // ssd1306_rect(&ssd, 3, 3, 122, 58, cor, !cor); // Desenha um retângulo
-    // // ssd1306_draw_string(&ssd, "abcdefghijkl", 8, 10); // Desenha uma string
-    // // ssd1306_draw_string(&ssd, "mnopqrstuvwxyz", 20, 30); // Desenha uma string
-    // // ssd1306_draw_string(&ssd, "0123456789", 15, 48); // Desenha uma string
+  while (true)
+  {
 
-    // ssd1306_send_data(&ssd); // Atualiza o display
-
-    // sleep_ms(1000);
-
-    // colocar :, ? e ! no ssd1306.c
-    if (stdio_usb_connected()) { // Certifica-se de que o USB está conectado
+    if (stdio_usb_connected())
+    {
       char c;
-      if (scanf("%c", &c) == 1) { // Lê caractere da entrada padrão
-        printf("Caractere: '%c'\n", c);
-        ssd1306_draw_string(&ssd, "Caractere: ", 8, 10);
-        ssd1306_draw_char(&ssd, c, 90, 10);
+      scanf("%c", &c);
+      printf("Caractere: '%c'\n", c);
 
-        
-      }
+      debounce = delayed_by_ms(get_absolute_time(), 100);
 
-      if(c >= '0') {
-        
+      ssd1306_draw_string(&ssd, "Caractere ", 8, 10);
+      ssd1306_draw_char(&ssd, c, 90, 10);
+      ssd1306_send_data(&ssd);
+
+      if (c >= '0' && c <= '9')
+      {
+        num = c - '0'; // converte o caractere para o tipo uint8_t
+        matrix_draw_number(numeros_low, num);
       }
     }
-    sleep_ms(40);
   }
-  return 0;
+  sleep_ms(40);
 }
 
 // Função callback que verifica o tempo para que o debouncing ocorra, atualiza esse tempo, verifica o botão que
 // foi pressionado, atualiza o valor de cont para exibir o número correto na tela e imprime o valor na matriz
 void gpio_irq_handler(uint gpio, uint32_t events)
 {
-  uint32_t current_time = to_us_since_boot(get_absolute_time());
+  if (time_reached(debounce))
+  {
+    // Debounce para o botão A
+    if (gpio == BUTTON_A_PIN)
+    { 
+      // verifica se o LED azul está ligado. Se sim, ele é desligado para não misturar as cores
+      if (gpio_get(BLUE_LED_PIN))
+      {
+        gpio_put(BLUE_LED_PIN, 0);
+      }
+      gpio_put(GREEN_LED_PIN, !gpio_get(GREEN_LED_PIN)); // Alterna o estado do LED verde
+      if (gpio_get(GREEN_LED_PIN))
+      {
+        printf("LED VERDE ON\n");
+        ssd1306_draw_string(&ssd, "LED VERDE ON   ", 15, 48);
+      }
+      else if (!gpio_get(GREEN_LED_PIN))
+      {
+        printf("LED VERDE OFF\n");
+        ssd1306_draw_string(&ssd, "LED VERDE OFF ", 15, 48);
+      }
+    }
 
-  // Debounce para o botão A
-  if (gpio == BUTTON_A_PIN && (current_time - last_time_a > 200000))
-  { // 200 ms
-    last_time_a = current_time;
-    // verifica se o LED azul está ligado. Se sim, ele é desligado para não misturar as cores
-    if (gpio_get(BLUE_LED_PIN))
-    {
-      gpio_put(BLUE_LED_PIN, 0);
+    // Debounce para o botão B
+    if (gpio == BUTTON_B_PIN)
+    { 
+      // verifica se o LED verde está ligado. Se sim, ele é desligado para não misturar as cores
+      if (gpio_get(GREEN_LED_PIN))
+      {
+        gpio_put(GREEN_LED_PIN, 0);
+      }
+      gpio_put(BLUE_LED_PIN, !gpio_get(BLUE_LED_PIN)); // Alterna o estado do LED azul
+      if (gpio_get(BLUE_LED_PIN))
+      {
+        printf("LED AZUL ON\n");
+        ssd1306_draw_string(&ssd, "LED AZUL ON   ", 15, 48);
+      }
+      else if (!gpio_get(BLUE_LED_PIN))
+      {
+        printf("LED AZUL OFF\n");
+        ssd1306_draw_string(&ssd, "LED AZUL OFF   ", 15, 48);
+      }
     }
-    gpio_put(GREEN_LED_PIN, !gpio_get(GREEN_LED_PIN)); // Alterna o estado do LED verde
-    if (gpio_get(GREEN_LED_PIN))
-    {
-      printf("LED VERDE ON\n");
-      ssd1306_draw_string(&ssd, "LED VERDE ON   ", 15, 48);
-    }
-    else if (!gpio_get(GREEN_LED_PIN))
-    {
-      printf("LED VERDE OFF\n");
-      ssd1306_draw_string(&ssd, "LED VERDE OFF ", 15, 48);
-    }
+
+    // atualiza o display
+    ssd1306_send_data(&ssd);
+    debounce=delayed_by_ms(get_absolute_time(), 200);
   }
-
-  // Debounce para o botão B
-  if (gpio == BUTTON_B_PIN && (current_time - last_time_b > 200000))
-  { // 200 ms
-    last_time_b = current_time;
-    // verifica se o LED verde está ligado. Se sim, ele é desligado para não misturar as cores
-    if (gpio_get(GREEN_LED_PIN))
-    {
-      gpio_put(GREEN_LED_PIN, 0);
-    }
-    gpio_put(BLUE_LED_PIN, !gpio_get(BLUE_LED_PIN)); // Alterna o estado do LED azul
-    if (gpio_get(BLUE_LED_PIN))
-    {
-      printf("LED AZUL ON\n");
-      ssd1306_draw_string(&ssd, "LED AZUL ON   ", 15, 48);
-    }
-    else if (!gpio_get(BLUE_LED_PIN))
-    {
-      printf("LED AZUL OFF\n");
-      ssd1306_draw_string(&ssd, "LED AZUL OFF  ", 15, 48);
-    }
-  }
-
-  // atualiza o display
-  ssd1306_send_data(&ssd);
 }
