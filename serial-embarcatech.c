@@ -37,20 +37,21 @@ int main() {
   gpio_set_irq_enabled_with_callback(BUTTON_A_PIN, GPIO_IRQ_EDGE_FALL, true, &button_irq_handler);
   gpio_set_irq_enabled_with_callback(BUTTON_B_PIN, GPIO_IRQ_EDGE_FALL, true, &button_irq_handler);
 
-  // Inicialização do I2C, usando em 400KHz
+  // Inicialização do I2C, usando-o em 400KHz
   i2c_init(I2C_PORT, 400 * 1000);
 
-  gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);                    // Set the GPIO pin function to I2C
-  gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);                    // Set the GPIO pin function to I2C
-  gpio_pull_up(I2C_SDA);                                        // Pull up the data line
-  gpio_pull_up(I2C_SCL);                                        // Pull up the clock line   
-  ssd1306_init(&ssd, WIDTH, HEIGHT, false, endereco, I2C_PORT); // Inicializa o display
-  ssd1306_config(&ssd);                                         // Configura o display
-  ssd1306_send_data(&ssd);                                      // Envia os dados para o display
+  gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);                    // set the GPIO pin function to I2C
+  gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);                    // set the GPIO pin function to I2C
+  gpio_pull_up(I2C_SDA);                                        // pull up the data line
+  gpio_pull_up(I2C_SCL);                                        // pull up the clock line   
+  ssd1306_init(&ssd, WIDTH, HEIGHT, false, endereco, I2C_PORT); // inicializa o display
+  ssd1306_config(&ssd);                                         // configura o display
+  ssd1306_send_data(&ssd);                                      // envia os dados para o display
 
-  ssd1306_fill(&ssd, false);                                    // Limpa o display, ele é iniciado com todos os pixels apagados
-  ssd1306_send_data(&ssd);                                      // Envia os dados para o display
+  ssd1306_fill(&ssd, false);                                    // limpa o display, ele é iniciado com todos os pixels apagados
+  ssd1306_send_data(&ssd);                                      // envia os dados para o display
 
+  // inicializa o debounce
   debounce = delayed_by_ms(get_absolute_time(), 200);
 
   while (true) {
@@ -60,6 +61,7 @@ int main() {
       scanf("%c", &c);
       printf("Caractere: '%c'\n", c);
 
+      // atualiza o tempo para impedir a ação do botão durante 100ms
       debounce = delayed_by_ms(get_absolute_time(), 100);
 
       ssd1306_draw_string(&ssd, "Caractere: ", 8, 10);
@@ -95,7 +97,7 @@ void button_irq_handler(uint gpio, uint32_t events) {
       }
       else if (!gpio_get(GREEN_LED_PIN)) {
         printf("LED VERDE OFF\n");
-        ssd1306_draw_string(&ssd, "LED VERDE OFF? ", 15, 48);
+        ssd1306_draw_string(&ssd, "LED VERDE OFF! ", 15, 48);
       }
     }
 
@@ -110,16 +112,14 @@ void button_irq_handler(uint gpio, uint32_t events) {
       // exibe mensagem de acordo com o estado do led
       if (gpio_get(BLUE_LED_PIN)) {
         printf("LED AZUL ON\n");
-        ssd1306_draw_string(&ssd, "LED AZUL ON?  ", 15, 48);
+        ssd1306_draw_string(&ssd, "LED AZUL ON!  ", 15, 48);
       }
       else if (!gpio_get(BLUE_LED_PIN)) {
         printf("LED AZUL OFF\n");
         ssd1306_draw_string(&ssd, "LED AZUL OFF!  ", 15, 48);
       }
     }
-
-    // atualiza o display
-    ssd1306_send_data(&ssd);
-    debounce = delayed_by_ms(get_absolute_time(), 200);
+    ssd1306_send_data(&ssd);                              // atualiza o display
+    debounce = delayed_by_ms(get_absolute_time(), 200);   // atualiza o debounce após a ação
   }
 }
