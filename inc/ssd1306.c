@@ -1,6 +1,10 @@
 #include "ssd1306.h"
 #include "font.h"
 
+// Funções
+
+// Função que inicializa o display, configurando suas dimensões, endereço I2C, 
+// e criando os buffers necessários para envio de dados ao display
 void ssd1306_init(ssd1306_t *ssd, uint8_t width, uint8_t height, bool external_vcc, uint8_t address, i2c_inst_t *i2c) {
     ssd->width = width;
     ssd->height = height;
@@ -75,15 +79,9 @@ void ssd1306_pixel(ssd1306_t *ssd, uint8_t x, uint8_t y, bool value) {
         ssd->ram_buffer[index] &= ~(1 << pixel);
 }
 
-/*
+// Função que preenche todo o display com 0 (apagado) ou 1 (aceso)
 void ssd1306_fill(ssd1306_t *ssd, bool value) {
-  uint8_t byte = value ? 0xFF : 0x00;
-  for (uint8_t i = 1; i < ssd->bufsize; ++i)
-    ssd->ram_buffer[i] = byte;
-}*/
-
-void ssd1306_fill(ssd1306_t *ssd, bool value) {
-    // Itera por todas as posições do display
+    // itera por todas as posições do display
     for (uint8_t y = 0; y < ssd->height; ++y) {
         for (uint8_t x = 0; x < ssd->width; ++x) {
             ssd1306_pixel(ssd, x, y, value);
@@ -91,6 +89,7 @@ void ssd1306_fill(ssd1306_t *ssd, bool value) {
     }
 }
 
+// Função que desenha um retângulo no display
 void ssd1306_rect(ssd1306_t *ssd, uint8_t top, uint8_t left, uint8_t width, uint8_t height, bool value, bool fill) {
     for (uint8_t x = left; x < left + width; ++x) {
         ssd1306_pixel(ssd, x, top, value);
@@ -154,14 +153,23 @@ void ssd1306_vline(ssd1306_t *ssd, uint8_t x, uint8_t y0, uint8_t y1, bool value
 void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y) {
     uint16_t index = 0;
     char ver = c;
-    if (c >= 'A' && c <= 'Z') {
-        index = (c - 'A' + 11) * 8; // Para letras maiúsculas
-    } 
-    else if (c >= '0' && c <= '9') {
-        index = (c - '0' + 1) * 8; // Adiciona o deslocamento necessário
+    if (c >= '0' && c <= '9') {
+        index = (c - '0' + 1) * 8;     // para números
     }
+    else if (c >= 'A' && c <= 'Z') {
+        index = (c - 'A' + 11) * 8;    // para letras maiúsculas
+    } 
     else if (c >= 'a' && c <= 'z') {
-        index = (c - 'a' + 37) * 8;
+        index = (c - 'a' + 37) * 8;    // para letras minúsculas
+    }
+    else if (c == '!') {
+        index = (c - '!' + 63) * 8;    // para '!'
+    }
+    else if (c == ':') {
+        index = (c - ':' + 64) * 8;    // para ':'
+    }
+    else if (c == '?') {
+        index = (c - '?' + 65) * 8;    // para '?'
     }
 
     for (uint8_t i = 0; i < 8; ++i) {
